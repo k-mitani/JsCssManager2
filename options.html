@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JS CSS Manager Setting</title>
+    <style type="text/css">
+        .editor {
+            width: 40em;
+            height: 15em;
+        }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <h3>Import</h3>
+      <textarea class="editor" v-model="importCssText"></textarea>
+      <br>
+      <button @click="importCss">Import CSS</button>
+      
+      <h3>Export</h3>
+      <textarea class="editor" v-model="exportCssText"></textarea>
+
+      <div v-show="hasError">
+        <h3>Error</h3>
+        <pre>{{errorText}}</pre>
+      </div>
+    </div>
+  </body>
+  <script src="vue.2.6.10.js"></script>
+  <script src="options.js"></script>
+</html>

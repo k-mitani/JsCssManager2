@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Editor</title>
+    <style type="text/css">
+        .host-editor {
+            width: 20em;
+            height: 1.5em;
+        }
+        .style-editor {
+            width: 40em;
+            height: 10em;
+            white-space: nowrap;
+            overflow: auto;
+        }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+        <div>
+          Host:
+          <input type="text" v-model="host" class="host-editor">
+          <span>
+            {{message}}
+          </span>
+        </div>
+        <h3>CSS</h3>
+        <textarea @keyup.ctrl.enter="save" v-model="hostCss" class="style-editor"></textarea>
+        <h3>JS</h3>
+        <textarea @keyup.ctrl.enter="save" v-model="hostJs" class="style-editor"></textarea>
+        <button @click="save">Save & Apply (Ctrl + Enter)</button>
+        <button @click="close">Close</button>
+      </div>
+  </body>
+  <script src="vue.2.6.10.js"></script>
+  <script src="popup.js"></script>
+</html>
