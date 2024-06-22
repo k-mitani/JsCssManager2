@@ -1,9 +1,8 @@
 {
-  "name": "JS CSS Manager",
-  "description" : "",
-  "version": "1.0",
-  "manifest_version": 2,
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "name": "JS CSS Manager (for Manifest V3)",
+  "description": "",
+  "version": "2.0",
+  "manifest_version": 3,
   "content_scripts": [
     {
       "matches": ["*://*/*"],
@@ -11,11 +10,12 @@
       "run_at": "document_start"
     }
   ],
-
+  "background": {
+    "service_worker": "sw.js"
+  },
   "options_page": "options.html",
-
-  "permissions": ["activeTab", "storage"],
-  "browser_action": {
+  "permissions": ["activeTab", "storage", "userScripts"],
+  "action": {
     "default_popup": "popup.html",
     "default_icon": "icon.png"
   }
