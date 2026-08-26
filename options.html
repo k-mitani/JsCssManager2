@@ -7,16 +7,29 @@
         width: 40em;
         height: 15em;
       }
+      .log {
+        width: 60em;
+        max-height: 20em;
+        overflow: auto;
+        border: 1px solid #ccc;
+        padding: 0.5em;
+        background: #f8f8f8;
+      }
+      .log .error {
+        color: #c00;
+        font-weight: bold;
+      }
     </style>
   </head>
 
   <body>
 
-    <div class="labelChromeDeveloperModeCaution" style="display: none;">
+    <div class="labelUserScriptsCaution" style="display: none;">
       <h3 style="color: red;">Caution!</h3>
       <strong>
-        <p>Developer mode is disabled. To enable User Script, please enable Developer mode.</p>
-        <p>See <a href="https://www.tampermonkey.net/faq.php?locale=en#Q209" target="_blank">https://www.tampermonkey.net/faq.php?locale=en#Q209</a> for more information.</p>
+        <p>JS injection is disabled.</p>
+        <p>Open <code>chrome://extensions</code>, click <em>Details</em> on this extension, and turn on <em>Allow User Scripts</em>.</p>
+        <p>See <a href="https://developer.chrome.com/docs/extensions/reference/api/userScripts" target="_blank" rel="noreferrer">the userScripts API documentation</a> for more information.</p>
       </strong>
     </div>
     
@@ -37,6 +50,26 @@
     <div>
       <h3>System Message</h3>
       <pre class="labelError">no message</pre>
+    </div>
+
+    <div>
+      <h3>Registration Status</h3>
+      <button class="buttonShowStatus">Show Status</button>
+      <pre class="log labelStatus" style="display: none;"></pre>
+    </div>
+
+    <div>
+      <h3>Log</h3>
+      <p>
+        <label>
+          <input type="checkbox" class="checkLogEnabled">
+          Record log for this browser session
+        </label>
+      </p>
+      <div class="logArea" style="display: none;">
+        <pre class="log labelLog"></pre>
+        <button class="buttonClearLog">Clear Log</button>
+      </div>
     </div>
 
   </body>

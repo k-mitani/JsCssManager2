@@ -3,9 +3,31 @@
   <head>
     <title>Editor</title>
     <style type="text/css">
+      h3 {
+        margin-top: 0.5em;
+        margin-bottom: 0.2em;
+      }
       .host-editor {
         width: 20em;
         height: 1.5em;
+      }
+      .labelMessage {
+        max-width: 40em;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .labelMessage.error {
+        color: #c00;
+        font-weight: bold;
+      }
+      .labelMessage.fade {
+        opacity: 0;
+        transition: opacity 500ms linear;
+      }
+      .worldRow {
+        font-size: 0.75rem;
+        font-weight: normal;
+        margin-left: 0.5em;
       }
       .style-editor {
         width: 40em;
@@ -27,7 +49,19 @@
     <h3>CSS</h3>
     <textarea class="style-editor textCss"></textarea>
     
-    <h3>JS</h3>
+    <h3>
+      JS
+      <span class="worldRow">
+        world:
+        <select class="selectWorld">
+          <option value="MAIN">MAIN</option>
+          <option value="USER_SCRIPT">USER_SCRIPT</option>
+        </select>
+        <a style="font-size: 1rem;"
+           href="https://developer.chrome.com/docs/extensions/reference/api/userScripts#work-in-isolated-worlds"
+           target="_blank" rel="noreferrer">?</a>
+      </span>
+    </h3>
     <textarea class="style-editor textJs"></textarea>
     
     <button class="buttonSave">Save & Apply (Ctrl + Enter)</button>

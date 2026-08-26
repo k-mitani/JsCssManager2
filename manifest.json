@@ -6,7 +6,7 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["contentScript.js"],
+      "js": ["storage.js", "contentScript.js"],
       "run_at": "document_start"
     }
   ],
@@ -15,6 +15,7 @@
   },
   "options_page": "options.html",
   "permissions": ["activeTab", "storage", "userScripts"],
+  "host_permissions": ["*://*/*"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icon.png"
