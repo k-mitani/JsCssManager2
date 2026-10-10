@@ -1,7 +1,7 @@
 {
   "name": "JS CSS Manager (for Manifest V3)",
   "description": "",
-  "version": "2.0",
+  "version": "4.0",
   "manifest_version": 3,
   "content_scripts": [
     {

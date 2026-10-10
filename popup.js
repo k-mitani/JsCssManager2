@@ -4,17 +4,22 @@ function on($el, eventName, method) {
 
 const MESSAGE_HOLD_MS = 500;
 
-var _fadeTimerId = 0;
-function setMessage(text, isError) {
-    clearTimeout(_fadeTimerId);
-    $labelMessage.textContent = text;
-    $labelMessage.title = isError ? text : "";
-    $labelMessage.classList.toggle("error", !!isError);
-    $labelMessage.classList.remove("fade");
+// メッセージ欄ごとにフェードのタイマーを持つ。
+var _fadeTimerIds = new Map();
+function showMessage($label, text, isError, holdMs = MESSAGE_HOLD_MS) {
+    clearTimeout(_fadeTimerIds.get($label));
+    $label.textContent = text;
+    $label.title = isError ? text : "";
+    $label.classList.toggle("error", !!isError);
+    $label.classList.remove("fade");
 
     if (isError) return;
 
-    _fadeTimerId = setTimeout(() => $labelMessage.classList.add("fade"), MESSAGE_HOLD_MS);
+    _fadeTimerIds.set($label, setTimeout(() => $label.classList.add("fade"), holdMs));
+}
+
+function setMessage(text, isError, holdMs) {
+    showMessage($labelMessage, text, isError, holdMs);
 }
 
 function setErrorMessage(text) {
@@ -24,7 +29,7 @@ function setErrorMessage(text) {
 var activeTab = null;
 
 var $textHost = document.querySelector(".textHost");
-var $labelMessage = document.querySelector(".labelMessage");
+var $labelMessage = document.querySelector(".labelMainMessage");
 var $textCss = document.querySelector(".textCss");
 var $textJs = document.querySelector(".textJs");
 var $selectWorld = document.querySelector(".selectWorld");
@@ -107,6 +112,15 @@ async function save() {
         chrome.tabs.sendMessage(activeTab.id, {type: "applycss"});
         console.log("save: sendMessage to tab: " + activeTab.id);
     }
+}
+
+// ? リンクで説明の表示を切り替える。
+for (const $help of document.querySelectorAll(".helpLink")) {
+    on($help, "click", (ev) => {
+        ev.preventDefault();
+        var $hint = document.querySelector($help.dataset.hint);
+        $hint.hidden = !$hint.hidden;
+    });
 }
 
 on($buttonClose, "click", () => {

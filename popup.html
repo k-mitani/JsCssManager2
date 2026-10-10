@@ -1,15 +1,27 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
     <title>Editor</title>
     <style type="text/css">
+      :root {
+        /* テキストエリアなどの幅。これより広い要素があるとポップアップが広がる。 */
+        --content-width: 34rem;
+      }
       h3 {
         margin-top: 0.5em;
         margin-bottom: 0.2em;
       }
+      /* テキスト欄・コンボボックス・ボタンの高さを揃える。 */
+      input[type="text"],
+      select,
+      button {
+        box-sizing: border-box;
+        height: 22px;
+        vertical-align: middle;
+      }
       .host-editor {
         width: 20em;
-        height: 1.5em;
       }
       .labelMessage {
         max-width: 40em;
@@ -29,8 +41,206 @@
         font-weight: normal;
         margin-left: 0.5em;
       }
+      .hostRow {
+        max-width: var(--content-width);
+        display: flex;
+        align-items: baseline;
+        gap: 0.3em;
+      }
+      /* ボタンが複数行になっても下の欄をずらさず、上に重ねて表示する。 */
+      .magicBar {
+        position: relative;
+        flex: 1;
+        align-self: stretch;
+        min-width: 0;
+      }
+      .magicBarInner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        /* 右から左へ並べる。 */
+        flex-direction: row-reverse;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.3em;
+        background: #fff;
+      }
+      /* エディタを開いている間は重ねずに、エディタを押し下げる。 */
+      body.editingMagic .magicBar {
+        align-self: flex-start;
+      }
+      body.editingMagic .magicBarInner {
+        position: static;
+      }
+      .magicButtons {
+        display: contents;
+      }
+      /* 漢字や絵文字のフォントで高さが変わらないように固定する。 */
+      .magicButton,
+      .buttonAddMagic,
+      .buttonEditMode {
+        padding-top: 0;
+        padding-bottom: 0;
+        line-height: 18px;
+      }
+      .magicButton {
+        max-width: 12em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      /* 編集モード中: ボタンを点線で囲み、タップで編集できることを示す。 */
+      body.magicEditMode .magicButton {
+        outline: 1px dashed #aaa;
+        outline-offset: -3px;
+      }
+      /* 編集画面で開いているボタン。 */
+      .magicButton.editing,
+      body.magicEditMode .magicButton.editing {
+        outline: 2px dashed #1a73e8;
+        outline-offset: -4px;
+      }
+      /* + と ✎ は実行ボタンと区別できるように白っぽくする。
+         (背景色を変えると枠が立体表示になって黒線が出るので、枠も指定する。) */
+      .buttonAddMagic,
+      .buttonEditMode {
+        /* 文字幅が違っても同じ大きさにする。 */
+        width: 24px;
+        padding-left: 0;
+        padding-right: 0;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background: #fff;
+        color: #555;
+      }
+      .buttonAddMagic:hover,
+      .buttonEditMode:hover {
+        background: #f5f5f5;
+      }
+      .buttonEditMode.active {
+        border-color: #36f;
+        background: #36f;
+        color: #fff;
+      }
+      .magicButton.dragging {
+        opacity: 0.4;
+      }
+      /* 右から左へ並ぶので、前は右側、後ろは左側に印を出す。 */
+      .magicButton.dropBefore {
+        box-shadow: 3px 0 0 #36f;
+      }
+      .magicButton.dropAfter {
+        box-shadow: -3px 0 0 #36f;
+      }
+      /* テキストエリアと同じ幅にして、開いてもポップアップの横幅を変えない。 */
+      .magicEditor {
+        position: relative;
+        box-sizing: border-box;
+        width: var(--content-width);
+        margin: 0.5em 0;
+        padding: 0.5em;
+        border: 1px solid #aaa;
+        background: #f6f6f6;
+      }
+      .buttonMagicDelete {
+        position: absolute;
+        top: 0.5em;
+        right: 0.5em;
+      }
+      .magicLastResult {
+        margin-top: 0.3em;
+      }
+      .magicLastResult[hidden] {
+        display: none;
+      }
+      .sessionResult {
+        max-width: var(--content-width);
+        margin-top: 0.3em;
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+      }
+      .sessionResult[hidden] {
+        display: none;
+      }
+      .labelSessionResult {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: monospace;
+      }
+      .labelSessionResult.error {
+        color: #c00;
+      }
+      .lastResultRow {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.3em;
+      }
+      .labelLastResult {
+        flex: 1;
+        min-width: 0;
+        max-height: 8em;
+        overflow: auto;
+        margin: 0;
+        padding: 0.3em;
+        border: 1px solid #ccc;
+        background: #fff;
+        font-size: 0.8rem;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .labelLastResult.error {
+        color: #c00;
+      }
+      .magicEditor[hidden] {
+        display: none;
+      }
+      .magicEditor .field {
+        margin-bottom: 0.3em;
+      }
+      .magicEditor .fieldLabel {
+        display: inline-block;
+        width: 3em;
+      }
+      .hint {
+        max-width: var(--content-width);
+        font-size: 0.75rem;
+        color: #666;
+      }
+      .hint[hidden] {
+        display: none;
+      }
+      /* チェックボックスと文字のベースラインを揃える。 */
+      .check {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2em;
+        vertical-align: middle;
+      }
+      .check input {
+        margin: 0;
+      }
+      .helpLink {
+        font-size: 1rem;
+        font-weight: normal;
+      }
+      /* エディタを開いて縦に伸びたときに、スクロールバーで横幅が変わらないようにする。 */
+      html {
+        scrollbar-width: none;
+      }
+      html::-webkit-scrollbar {
+        display: none;
+      }
       .style-editor {
-        width: 40em;
+        box-sizing: border-box;
+        width: var(--content-width);
         height: 10em;
         white-space: nowrap;
         overflow: auto;
@@ -40,10 +250,58 @@
 
   <body>
     
-    <div>
+    <div class="hostRow">
       Host:
       <input type="text" class="host-editor textHost">
-      <span class="labelMessage"></span>
+      <div class="magicBar">
+        <div class="magicBarInner">
+          <span class="magicButtons"></span>
+          <button class="buttonAddMagic" title="Add magic button">+</button>
+          <button class="buttonEditMode" title="Edit mode: click a button to edit, drag to reorder">✎</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="magicEditor" hidden>
+      <button class="buttonMagicDelete">Delete</button>
+      <div class="field">
+        <span class="fieldLabel">Text:</span>
+        <input type="text" class="textMagicLabel" style="width: 20em;">
+      </div>
+      <div class="field">
+        <span class="fieldLabel">Host:</span>
+        <input type="text" class="textMagicHosts" style="width: 20em;">
+        <a href="#" class="helpLink" data-hint=".hintMagicHosts">?</a>
+        <div class="hint hintMagicHosts" hidden>Comma separated. Wildcard (*.example.com) is allowed. "*" means all hosts.</div>
+      </div>
+      <h3>
+        JS
+        <span class="worldRow">
+          world:
+          <select class="selectMagicWorld">
+            <option value="MAIN">MAIN</option>
+            <option value="USER_SCRIPT">USER_SCRIPT</option>
+          </select>
+          <label class="check"><input type="checkbox" class="checkMagicClose">close popup after run</label>
+          <label class="check"><input type="checkbox" class="checkMagicSaveResult">save last result</label>
+          <a href="#" class="helpLink" data-hint=".hintMagicJs">?</a>
+        </span>
+      </h3>
+      <div class="hint hintMagicJs" hidden>The value of the last expression is shown as the result.</div>
+      <textarea class="style-editor textMagicJs" style="width: 100%;"></textarea>
+      <div>
+        <button class="buttonMagicSave">Save (Ctrl + Enter)</button>
+        <button class="buttonMagicRun">Run (Ctrl + Shift + Enter)</button>
+        <button class="buttonMagicClose">Close</button>
+        <span class="labelMessage labelMagicMessage"></span>
+      </div>
+      <div class="magicLastResult" hidden>
+        <div class="hint">Last result <span class="labelLastResultTime"></span></div>
+        <div class="lastResultRow">
+          <pre class="labelLastResult"></pre>
+          <button class="buttonCopyLastResult">Copy</button>
+        </div>
+      </div>
     </div>
     
     <h3>CSS</h3>
@@ -57,17 +315,27 @@
           <option value="MAIN">MAIN</option>
           <option value="USER_SCRIPT">USER_SCRIPT</option>
         </select>
-        <a style="font-size: 1rem;"
-           href="https://developer.chrome.com/docs/extensions/reference/api/userScripts#work-in-isolated-worlds"
-           target="_blank" rel="noreferrer">?</a>
+        <a href="#" class="helpLink" data-hint=".hintWorld">?</a>
       </span>
     </h3>
+    <div class="hint hintWorld" hidden>
+      MAIN: Runs in the page's own JS context. Page variables and functions are accessible.<br>
+      USER_SCRIPT: Runs isolated from the page's JS (only the DOM is shared). Not blocked by the page's CSP.
+    </div>
     <textarea class="style-editor textJs"></textarea>
     
-    <button class="buttonSave">Save & Apply (Ctrl + Enter)</button>
-    <button class="buttonClose">Close</button>
+    <div>
+      <button class="buttonSave">Save & Apply (Ctrl + Enter)</button>
+      <button class="buttonClose">Close</button>
+      <span class="labelMessage labelMainMessage"></span>
+    </div>
+    <div class="sessionResult" hidden>
+      <span class="labelSessionResult"></span>
+      <button class="buttonCopySessionResult">Copy</button>
+    </div>
 
   </body>
   <script src="storage.js"></script>
   <script src="popup.js"></script>
+  <script src="magicButtons.js"></script>
 </html>
